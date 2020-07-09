@@ -143,24 +143,17 @@ Benefits include:
 Platinum Sponsor:
 *****************
 
-.. figure:: logo/machine-factor-technologies.png
+.. figure:: logo/plat_sponsors.png
    :scale: 100 %
    :align: center
    :figclass: align-center
    :alt: Platinum Sponsors
-   :target: https://machinefactor.tech/
+   :target: https://hudsonthames.org/sponsors/
 
 Gold Sponsors:
 **************
 
 .. figure:: logo/gold_sponsors.png
-   :scale: 100 %
-   :align: center
-   :figclass: align-center
-   :alt: Gold Sponsors
-   :target: https://hudsonthames.org/sponsors/
-
-.. figure:: logo/ali_saif.jpg
    :scale: 100 %
    :align: center
    :figclass: align-center
@@ -263,6 +256,7 @@ This project is licensed under an all rights reserved licence.
     getting_started/barriers_to_entry
     getting_started/researcher
     getting_started/datasets
+    getting_started/research_tools
 
 .. toctree::
     :maxdepth: 2
@@ -271,7 +265,6 @@ This project is licensed under an all rights reserved licence.
 
     implementations/data_structures
     implementations/filters
-    implementations/codependence
     implementations/frac_diff
     implementations/structural_breaks
     implementations/microstructural_features
@@ -279,13 +272,30 @@ This project is licensed under an all rights reserved licence.
 
 .. toctree::
     :maxdepth: 2
-    :caption: Labelling
+    :caption: Codependence
     :hidden:
 
-    implementations/tb_meta_labeling
-    implementations/labeling_trend_scanning
-    implementations/labeling_tail_sets
-    implementations/labeling_fixed_time_horizon
+    codependence/introduction
+    codependence/correlation_based_metrics
+    codependence/information_theory_metrics
+    codependence/codependence_marti
+    codependence/codependence_matrix
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Labeling
+    :hidden:
+
+    labeling/tb_meta_labeling
+    labeling/labeling_trend_scanning
+    labeling/labeling_tail_sets
+    labeling/labeling_fixed_time_horizon
+    labeling/labeling_matrix_flags
+    labeling/labeling_excess_median
+    labeling/labeling_raw_return
+    labeling/labeling_vs_benchmark
+    labeling/labeling_excess_mean
+
 
 .. toctree::
     :maxdepth: 2
@@ -326,7 +336,7 @@ This project is licensed under an all rights reserved licence.
     portfolio_optimisation/mean_variance
     portfolio_optimisation/critical_line_algorithm
     portfolio_optimisation/hierarchical_risk_parity
-    portfolio_optimisation/hierarchical_clustering_asset_allocation
+    portfolio_optimisation/hierarchical_equal_risk_contribution
     portfolio_optimisation/nested_clustered_optimisation
     portfolio_optimisation/theory_implied_correlation
 

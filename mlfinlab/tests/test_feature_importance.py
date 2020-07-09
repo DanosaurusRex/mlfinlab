@@ -36,7 +36,7 @@ class TestFeatureImportance(unittest.TestCase):
         self.bag_clf = BaggingClassifier(base_estimator=self.clf_base, max_features=1.0, n_estimators=100,
                                          oob_score=True, random_state=1)
         self.fit_clf = self.bag_clf.fit(self.X, self.y)
-        self.cv_gen = KFold(n_splits=3, random_state=0)
+        self.cv_gen = KFold(n_splits=3)
 
     def test_orthogonal_features(self):
         """
@@ -60,6 +60,13 @@ class TestFeatureImportance(unittest.TestCase):
 
         # Check correlation metrics results
         self.assertAlmostEqual(pca_corr_res['Weighted_Kendall_Rank'][0], 0.7424, delta=1e-1)
+
+        # Check particular number of PCA features
+        pca_ten_features = get_orthogonal_features(self.X, num_features=10)
+        self.assertEqual(pca_ten_features.shape[1], 10)
+
+        pca_five_features = get_orthogonal_features(self.X, num_features=5)
+        self.assertEqual(pca_five_features.shape[1], 5)
 
     def test_feature_importance(self):
         """
@@ -108,7 +115,10 @@ class TestFeatureImportance(unittest.TestCase):
         # MDI assertions
         self.assertAlmostEqual(mdi_feat_imp['mean'].sum(), 1, delta=0.001)
         # The most informative features
-        self.assertAlmostEqual(mdi_feat_imp.loc['I_1', 'mean'], 0.48058, delta=0.01)
+        # Value in the below test was changed after v.0.11.3 from 0.48058
+        #                                                     to  0.46835
+        # due to scikit-learn changing RandomForestClassifier, and BaggingClassifier outputs
+        self.assertAlmostEqual(mdi_feat_imp.loc['I_1', 'mean'], 0.46835, delta=0.01)
         self.assertAlmostEqual(mdi_feat_imp.loc['I_0', 'mean'], 0.08214, delta=0.01)
         # Redundant feature
         self.assertAlmostEqual(mdi_feat_imp.loc['R_0', 'mean'], 0.06511, delta=0.01)
@@ -117,7 +127,10 @@ class TestFeatureImportance(unittest.TestCase):
 
         # MDA(log_loss) assertions
         self.assertAlmostEqual(mda_feat_imp_log_loss.loc['I_1', 'mean'], 0.65522, delta=0.1)
-        self.assertAlmostEqual(mda_feat_imp_log_loss.loc['R_0', 'mean'], 0.00332, delta=0.1)
+        # Value in the below test was changed after v.0.11.3 from 0.00332
+        #                                                     to -0.20645
+        # due to scikit-learn changing RandomForestClassifier, and BaggingClassifier outputs
+        self.assertAlmostEqual(mda_feat_imp_log_loss.loc['R_0', 'mean'], -0.20645, delta=0.1)
 
         # MDA(f1) assertions
         self.assertAlmostEqual(mda_feat_imp_f1.loc['I_1', 'mean'], 0.47751, delta=0.1)
@@ -136,7 +149,10 @@ class TestFeatureImportance(unittest.TestCase):
         self.assertAlmostEqual(clustered_mdi.loc['I_0', 'mean'], 0.06575, delta=0.1)
 
         # Clustered MDA (log_loss) assertions
-        self.assertAlmostEqual(clustered_mda.loc['I_0', 'mean'], 0.04154, delta=0.1)
+        # Value in the below test was changed after v.0.11.3 from 0.04154
+        #                                                     to -0.12248
+        # due to scikit-learn changing RandomForestClassifier, and BaggingClassifier outputs
+        self.assertAlmostEqual(clustered_mda.loc['I_0', 'mean'], -0.12248, delta=0.1)
         self.assertAlmostEqual(clustered_mda.loc['R_0', 'mean'], 0.02940, delta=0.1)
 
         # Test if CFI with number of clusters same to number features is equal to normal MDI & MDA results

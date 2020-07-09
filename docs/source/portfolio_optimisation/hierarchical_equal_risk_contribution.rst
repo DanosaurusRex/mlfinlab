@@ -1,4 +1,4 @@
-.. _portfolio_optimisation-hierarchical_clustering_asset_allocation:
+.. _portfolio_optimisation-hierarchical_equal_risk_contribution:
 
 .. |br| raw:: html
 
@@ -28,13 +28,11 @@
     for users to use them.
 
 ===============================================
-Hierarchical Clustering Asset Allocation (HCAA)
+Hierarchical Equal Risk Contribution (HERC)
 ===============================================
 
-The Hierarchical Clustering based Asset Allocation (HCAA) method takes inspiration from the Hierarchical Risk Parity (HRP)
-algorithm and uses machine learning to allocate weights efficiently. While both the HCAA and HRP algorithms use hierarchical tree
-clustering and machine learning to allocate their weights, there are some subtle differences between the two. Lets look at a quick
-overview of how the HCAA algorithm works:
+The Hierarchical Equal Risk Contribution (HERC) method takes inspiration from the Hierarchical Risk Parity (HRP)
+algorithm and the Hierarchical Clustering based Asset Allocation (HCAA) and uses machine learning to allocate weights efficiently. While both the HERC and HRP algorithms use hierarchical tree clustering to allocate their weights, there are some subtle differences between the two. Lets look at a quick overview of how the HERC algorithm works:
 
 Overview of the Algorithm
 #########################
@@ -56,9 +54,9 @@ dendrogram).
 Calculate Optimal Number of Clusters
 ************************************
 
-This step is where HCAA deviates from the traditional HRP algorithm. The hierarchical risk parity method uses single linkage
+This step is where HERC deviates from the traditional HRP algorithm. The hierarchical risk parity method uses single linkage
 and grows the tree to maximum depth. However, the number of clusters identified by growing the tree maximally may not be the
-optimal one and can lead to sub-optimal results. **This is why before allocating the weights, HCAA calculates the optimal number of clusters and cuts the hierarchical tree formed in Step-1 to the required height and clusters**. Currently, the Gap Index is used for
+optimal one and can lead to sub-optimal results. **This is why before allocating the weights, HERC calculates the optimal number of clusters and cuts the hierarchical tree formed in Step-1 to the required height and clusters**. Currently, the Gap Index is used for
 calculating the required number of clusters.
 
 .. image:: portfolio_optimisation_images/gap.png
@@ -77,7 +75,7 @@ difference between the recursive bisections of the two algorithms.
 As seen in the above image, at each step, the weights in HRP trickle down the tree by breaking it down the middle based on the
 number of assets. Although, this uses the hierarchical tree identified in Step-1, it does not make use of the exact structure
 of the dendrogram while calculating the cluster contributions. This is a fundamental disadvantage of HRP which is improved
-upon by HCAA by dividing the tree, at each step, based on the structure induced by the dendrogram.
+upon by HERC by dividing the tree, at each step, based on the structure induced by the dendrogram.
 
 At each level of the tree, an Equal Risk Contribution allocation is used i.e. the weights are:
 
@@ -94,41 +92,45 @@ are the risk contributions of left and right clusters.
     and can underestimate the true risk of a portfolio which is why there are many other important risk metrics used by
     investment managers that can correctly reflect the true risk of a portfolio/asset. With respect to this, the original HRP
     algorithm can be tweaked to allocate its weights based on different risk representations of the clusters and generate
-    better weights. The HCAA method in mlfinlab provides the following risk metrics:
+    better weights. The HERC method in mlfinlab provides the following risk metrics:
 
-    1. ``minimum_variance`` : Variance of the clusters is used as a risk metric.
-    2. ``minimum_standard_deviation`` : Standard deviation of the clusters is used as a risk metric.
-    3. ``sharpe_ratio`` : Sharpe ratio of the clusters is used as a risk metric.
-    4. ``equal_weighting`` : All clusters are weighed equally in terms of risk.
-    5. ``expected_shortfall`` : Expected shortfall (CVaR) of the clusters is used as a risk metric.
-    6. ``conditional_drawdown_at_risk`` : Conditional drawdown at risk (CDaR) of the clusters is used as a risk metric.
+    1. ``variance`` : Variance of the clusters is used as a risk metric.
+    2. ``standard_deviation`` : Standard deviation of the clusters is used as a risk metric.
+    3. ``equal_weighting`` : All clusters are weighed equally in terms of risk.
+    4. ``expected_shortfall`` : Expected shortfall (CVaR) of the clusters is used as a risk metric.
+    5. ``conditional_drawdown_at_risk`` : Conditional drawdown at risk (CDaR) of the clusters is used as a risk metric.
 
 Naive Risk Parity
 *****************
 
 Having calculated the cluster weights in the previous step, this step calculates the final asset weights. Within the same
-cluster, an initial set of weights - :math:`W_{IVP}` - is calculated using the inverse-variance allocation. The final weights
-are given by the following equation:
+cluster, an initial set of weights - :math:`w_{NRP}` - is calculated using the naive risk parity allocation. In this approach, assets are allocated weights in proportion to the inverse of their respective risk; higher risk assets will receive lower portfolio weights, and lower risk assets will receive higher weights. Here the risk can be quantified in different ways - variance, CVaR, CDaR, max daily loss etc...
+
+The final weights are given by the following equation:
 
 .. math::
-    W^{i}_{final} = W^{i}_{IVP} * C^{i}, \: i \in Clusters
+    w^{i}_{final} = w^{i}_{NRP} * C^{i}, \: i \in Clusters
 
-where, :math:`W^{i}_{IVP}` refers to inverse-variance weights of assets in the :math:`i^{th}` cluster and :math:`C^{i}` is the
+where, :math:`w^{i}_{NRP}` refers to naive risk parity weights of assets in the :math:`i^{th}` cluster and :math:`C^{i}` is the
 weight of the  :math:`i^{th}` cluster calculated in Step-3.
 
 .. tip::
     |h4| Underlying Literature |h4_|
-    This implementation is based on the following two papers written by Thomas Raffinot.
+    This implementation is based on the following two papers written by Thomas Raffinot:
+
         * `Hierarchical Clustering based Asset Allocation <https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3237540>`_
         * `Hierarchical Equal Risk Contribution <https://ssrn.com/abstract=2840729>`_
+
+    You can read more about the Gap Index method in this paper:
+
         * `Gap Index Paper <https://statweb.stanford.edu/~gwalther/gap>`_
 
 Implementation
 ##############
 
-.. automodule:: mlfinlab.portfolio_optimization.hcaa
+.. automodule:: mlfinlab.portfolio_optimization.herc
 
-    .. autoclass:: HierarchicalClusteringAssetAllocation
+    .. autoclass:: HierarchicalEqualRiskContribution
         :members:
 
         .. automethod:: __init__
@@ -144,6 +146,7 @@ Implementation
     We provide great flexibility to the users in terms of the input data - they can either pass their own pre-calculated input
     matrices/dataframes or leave it to us to calculate them. A quick reference on common input parameters which you will encounter
     throughout the portfolio optimisation module:
+
         * :py:mod:`asset_prices`: Dataframe/matrix of historical raw asset prices **indexed by date**.
         * :py:mod:`asset_returns`: Dataframe/matrix of historical asset returns. This will be a :math:`TxN` matrix where :math:`T` is the time-series and :math:`N` refers to the number of assets in the portfolio.
         * :py:mod:`expected_asset_returns`: List of expected returns per asset i.e. the mean of historical asset returns. This refers to the parameter :math:`\mu` used in portfolio optimisation literature. For a portfolio of 5 assets, ``expected_asset_returns = [0.45, 0.56, 0.89, 1.34, 2.4]``.
@@ -152,7 +155,7 @@ Implementation
 
 .. tip::
     |h4| Different Linkage Methods |h4_|
-    The following linkage methods are supported by the HCAA class in mlfinlab. (The following is taken directly from and we highly
+    The following linkage methods are supported by the HERC class in mlfinlab. (The following is taken directly from and we highly
     recommend you read):
 
     `Papenbrock, J., 2011. Asset Clusters and Asset Networks in Financial Risk Management and Portfolio Optimization (Doctoral
@@ -190,11 +193,29 @@ Implementation
         proximity between clusters is usually defined as the distance between cluster centroids. The Ward method uses the increase
         in the sum of the squares error (SSE) to determine the clusters.
 
+Plotting
+########
+
+``plot_clusters()`` : Plots the hierarchical clusters formed during the clustering step. This is visualised in the form of dendrograms - a very common way of visualising the hierarchical tree clusters.
+
+.. code-block::
+
+    # Instantiate HERC Class
+    herc = HierarchicalEqualRiskContribution()
+    herc.allocate(asset_prices=stock_prices, risk_measure='equal_weighting')
+
+    # Plot Dendrogram
+    herc.plot_clusters(assets=stock_prices.columns)
+
+.. image:: portfolio_optimisation_images/dendrogram_herc.png
+
+In the above image, the colors of assets corresponds to the cluster to which that asset belongs. Assets in the same cluster have the same color. Note that this coloring scheme may change based on the optimal number of clusters identified by the algorithm (or specified by the user).
+
 Research Notebooks
 ##################
 
 The following research notebooks provide a more detailed exploration of the algorithm.
 
-* `How to use mlfinlab's HierarchicalClusteringAssetAllocation class`_
+* `How to use mlfinlab's HierarchicalEqualRiskContribution class`_
 
-.. _How to use mlfinlab's HierarchicalClusteringAssetAllocation class: https://github.com/hudson-and-thames/research/blob/master/Portfolio%20Optimisation%20Tutorials/Hierarchical%20Clustering%20Asset%20Allocation%20(HCAA)/HCAA%20Tutorial%20Notebook.ipynb
+.. _How to use mlfinlab's HierarchicalEqualRiskContribution class: https://github.com/hudson-and-thames/research/blob/master/Portfolio%20Optimisation%20Tutorials/Hierarchical%20Equal%20Risk%20Contribution%20(HERC)/HERC%20Tutorial%20Notebook.ipynb

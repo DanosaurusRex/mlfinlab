@@ -92,38 +92,37 @@ up on [Patreon](https://www.patreon.com/HudsonThames).
 Benefits include:
 1. Uninterrupted access: Should the code base pivot to closed source - your company will have access to all 
    implementations and the source code.
-2. A seat on the Hudson & Thames advisory council and votes towards the direction of research and implementations.
-3. Ongoing access to slide show presentations and Jupyter Notebooks. (files can be edited to suit your personal 
+2. Ongoing access to slide show presentations and Jupyter Notebooks. (files can be edited to suit your personal 
    needs such as classroom notes or client presentations.)
-4. Company / Organisation profile on [www.hudsonthames.org](https://hudsonthames.org/sponsors/)
-5. Use of Hudson & Thames sponsor badge on your website.
-6. Access to our communities Slack Channel.
-7. Subscription to project release updates and news.
+3. Company / Organisation profile on [www.hudsonthames.org](https://hudsonthames.org/sponsors/)
+4. Use of Hudson & Thames sponsor badge on your website.
+5. Access to our communities Slack Channel.
+6. Subscription to project release updates and news.
 
 ### Platinum Sponsor:
 <div align="center">
    <a href="https://hudsonthames.org/sponsors/">
-   <img src="https://raw.githubusercontent.com/hudson-and-thames/mlfinlab/master/docs/source/logo/machine-factor-technologies.png" height="200"><br>
+   <img src="https://raw.githubusercontent.com/hudson-and-thames/mlfinlab/master/docs/source/logo/plat_sponsors.png" height="200"><br>
 </div>
 
 
 * [Machine Factor Technologies](https://machinefactor.tech/)
+* [alis_](https://alis.capital/)
 
 ### Gold Sponsors:
 <div align="center">
    <a href="https://hudsonthames.org/sponsors/">
-   <img src="https://raw.githubusercontent.com/hudson-and-thames/mlfinlab/master/docs/source/logo/gold_sponsors.png" height="200"><br>
-</div>
-<div align="center">
-   <a href="https://hudsonthames.org/sponsors/">
-   <img src="https://raw.githubusercontent.com/hudson-and-thames/mlfinlab/master/docs/source/logo/ali_saif.jpg" height="200"><br>
+   <img src="https://raw.githubusercontent.com/hudson-and-thames/mlfinlab/master/docs/source/logo/gold_sponsors.png" height="300"><br>
 </div>
 
+
 * [E.P. Chan & Associates](https://www.epchan.com/)
+* [PolarStar](https://www.polarstarfunds.com/)
 * [Markov Capital](http://www.markovcapital.se/)
 * [Consilium Crypto](https://consiliumcrypto.ai)
 * [3Jane Capital](https://3jane.com/)
 * [Ali Saif](https://www.linkedin.com/in/ali-saif/)
+* [Ace Capital](https://acecapitalinvestments.com/)
 
 ---
 
