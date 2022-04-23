@@ -4,6 +4,7 @@ retain as much memory as possible.  This is done by differencing by a positive r
 number. Fractionally differenced series can be used as a feature in machine learning
 process.
 """
+from numbers import Number
 
 import numpy as np
 import pandas as pd
@@ -169,14 +170,28 @@ class FractionalDifferentiation:
         Note 2: diff_amt can be any positive fractional, not necessarity bounded [0, 1].
 
         :param series: (pd.DataFrame) A time series that needs to be differenced
-        :param diff_amt: (float) Differencing amount
-        :param thresh: (float) Threshold for minimum weight
+        :param diff_amt: (float|dict[str, float]) Differencing amount
+        :param thresh: (float|dict[str, float]) Threshold for minimum weight
         :return: (pd.DataFrame) A data frame of differenced series
         """
 
         # 1) Compute weights for the longest series
-        weights = get_weights_ffd(diff_amt, thresh, series.shape[0])
-        width = len(weights) - 1
+        if isinstance(diff_amt, Number) and isinstance(thresh, Number):
+            weight = get_weights_ffd(diff_amt, thresh, series.shape[0])
+            weights = {name: weight for name in series.columns}
+            width = {name: len(weights[name]) - 1 for name in series.columns}
+
+        else:
+            if isinstance(diff_amt, Number):
+                diff_amt = {name: diff_amt for name in series.columns}
+            if isinstance(thresh, Number):
+                thresh = {name: thresh for name in series.columns}
+
+            weights = {}
+            width = {}
+            for name in series.columns:
+                weights[name] = get_weights_ffd(diff_amt[name], thresh[name], series[name].shape[0])
+                width[name] = len(weights[name]) - 1
 
         # 2) Apply weights to values
         # 2.1) Start by creating a dictionary to hold all the fractionally differenced series
@@ -186,13 +201,13 @@ class FractionalDifferentiation:
         for name in series.columns:
             series_f = series[[name]].fillna(method='ffill').dropna()
             temp_df_ = pd.Series(index=series.index, dtype='float64')
-            for iloc1 in range(width, series_f.shape[0]):
-                loc0 = series_f.index[iloc1 - width]
+            for iloc1 in range(width[name], series_f.shape[0]):
+                loc0 = series_f.index[iloc1 - width[name]]
                 loc1 = series.index[iloc1]
 
                 # At this point all entries are non-NAs, hence no need for the following check
                 # if np.isfinite(series.loc[loc1, name]):
-                temp_df_[loc1] = np.dot(weights.T, series_f.loc[loc0:loc1])[0, 0]
+                temp_df_[loc1] = np.dot(weights[name].T, series_f.loc[loc0:loc1])[0, 0]
 
             output_df[name] = temp_df_.copy(deep=True)
 
@@ -242,7 +257,7 @@ def frac_diff_ffd(series, diff_amt, thresh=1e-5):
     """
     return FractionalDifferentiation.frac_diff_ffd(series, diff_amt, thresh)
 
-def plot_min_ffd(series):
+def plot_min_ffd(series: pd.Series):
     """
     Advances in Financial Machine Learning, Chapter 5, section 5.6, page 85.
 
@@ -267,31 +282,35 @@ def plot_min_ffd(series):
     Examples on how to interpret the results of this function are available in the corresponding part
     in the book Advances in Financial Machine Learning.
 
-    :param series: (pd.DataFrame) Dataframe that contains a 'close' column with prices to use.
-    :return: (plt.AxesSubplot) A plot that can be displayed or used to obtain resulting data.
+    :param series: (pd.Series) Series with prices to use.
+    :return: (pd.DataFrame) A DataFrame of the results.
     """
 
-    results = pd.DataFrame(columns=['adfStat', 'pVal', 'lags', 'nObs', '95% conf', 'corr'])
+    if not isinstance(series, pd.Series):
+        raise TypeError(f'Expected pd.Series, received {type(series)}')
+
+    results = pd.DataFrame(columns=['adfStat', 'pVal', 'lags', 'nObs', '95% conf', 'corr'])  
+
+    log_prices = np.log(series).resample('1D').last()  # Downcast to daily obs
+    log_prices.dropna(inplace=True)
 
     # Iterate through d values with 0.1 step
     for d_value in np.linspace(0, 1, 11):
-        close_prices = np.log(series[['close']]).resample('1D').last()  # Downcast to daily obs
-        close_prices.dropna(inplace=True)
 
         # Applying fractional differentiation
-        differenced_series = frac_diff_ffd(close_prices, diff_amt=d_value, thresh=0.01).dropna()
+        differenced_series = frac_diff_ffd(log_prices.to_frame(), diff_amt=d_value, thresh=0.01).dropna()
 
         # Correlation between the original and the differentiated series
-        corr = np.corrcoef(close_prices.loc[differenced_series.index, 'close'],
-                           differenced_series['close'])[0, 1]
+        corr = np.corrcoef(series.loc[differenced_series.index],
+                           differenced_series.iloc[:,0])[0, 1]
         # Applying ADF
-        differenced_series = adfuller(differenced_series['close'], maxlag=1, regression='c', autolag=None)
+        differenced_series = adfuller(differenced_series.iloc[:,0], maxlag=1, regression='c', autolag=None)
 
         # Results to dataframe
         results.loc[d_value] = list(differenced_series[:4]) + [differenced_series[4]['5%']] + [corr]  # With critical value
 
     # Plotting
-    plot = results[['adfStat', 'corr']].plot(secondary_y='adfStat', figsize=(10, 8))
+    results[['adfStat', 'corr']].plot(secondary_y='adfStat', figsize=(10, 8))
     plt.axhline(results['95% conf'].mean(), linewidth=1, color='r', linestyle='dotted')
 
-    return plot
+    return results
